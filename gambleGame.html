@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      * {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+      .container {
+        width: 45vw;
+        height: auto;
+        box-shadow: 20px 20px 40px rgba(60, 60, 150, 0.25);
+        padding: 20px;
+        transform: translate(-50%, -50%);
+        top: 50%;
+        left: 50%;
+        display: grid;
+        place-items: center;
+        position: absolute;
+        overflow-x: auto;
+        overflow-y: auto;
+        border-radius: 12px;
+      }
+
+      #circular-progress {
+        width: 120px;
+        height: 120px;
+        background-color: darkorange;
+        border-radius: 50%;
+        position: relative;
+        display: grid;
+        place-items: center;
+      }
+
+      #circular-progress:before {
+        content: "";
+        width: 85%;
+        height: 85%;
+        background-color: white;
+        position: absolute;
+        border-radius: 50%;
+      }
+
+      #progress-value {
+        position: absolute;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        font-size: 20px;
+      }
+
+      .odds {
+        display: flex;
+        gap: 28px;
+        font-size: 13px;
+      }
+    </style>
+    <link
+      rel="stylesheet"
+      href="./flag-icons-main/flag-icons-main/css/flag-icons.css"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <h1>
+        Kenya <i class="fi fi-ke"></i> vs Tanzania <i class="fi fi-tz"></i>
+      </h1>
+      <h2>Your acc bal: <span id="myBal"></span> (KES)</h2>
+      <div id="outcome"></div>
+
+      <div>
+        <div style="margin: 20px" id="inputs">
+          <div style="display: flex; justify-content: space-between">
+            <button onclick="topup()">Recharge Account</button>
+            <input type="number" name="accTopup" id="accTopup" value="0" />
+          </div>
+          <br />
+          <div style="display: flex; justify-content: space-between">
+            <label for="amount">Enter the stake amount: </label>
+            <input type="number" name="amount" id="wagerAmt" value="10" />
+          </div>
+
+          <br />
+          <div style="display: flex; gap: 10px">
+            <input
+              type="button"
+              value="Kenya"
+              id="kenya"
+              onclick="placeBet('Kenya')"
+            />
+            <input
+              type="button"
+              value="Draw"
+              id="draw"
+              onclick="placeBet('Draw')"
+            />
+            <input
+              type="button"
+              value="Tanzania"
+              id="tanzania"
+              onclick="placeBet('Tanzania')"
+            />
+          </div>
+          <div class="odds">
+            <span>2.134</span><span>17.95</span><span>4.52</span>
+          </div>
+          <div style="display: flex; justify-content: center; margin-top: 20px">
+            Your Loan: <span id="credit"> </span>
+          </div>
+        </div>
+
+        <div id="circular-progress" style="display: none">
+          <div id="progress-value"></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let wagerAmount = document.getElementById("wagerAmt");
+      let accTopup = document.getElementById("accTopup");
+      let inputCont = document.getElementById("inputs");
+      let outcome = document.getElementById("outcome");
+      let credit = document.getElementById("credit");
+      let myBal = document.getElementById("myBal");
+
+      let myBalance = 0,
+        myCredit = 0;
+      let maxLoan = 1000;
+      let outstandingLoan = credit.value;
+      let accountBalance = (myBal.value = myBalance);
+
+      myBal.textContent = accountBalance;
+      outstandingLoan = myCredit;
+      credit.textContent = outstandingLoan;
+
+      /* When the recharge account button is clicked */
+      topup = () => {
+        let topupValue = parseInt(accTopup.value);
+        if (accTopup.value && accTopup.value > 0 && accTopup.value <= maxLoan) {
+          if (
+            outstandingLoan <= maxLoan &&
+            outstandingLoan + topupValue <= maxLoan
+          ) {
+            accountBalance += topupValue;
+            myBal.textContent = accountBalance;
+
+            outstandingLoan += topupValue;
+            credit.textContent = outstandingLoan;
+            outcome.style.display = "none";
+          } else if (
+            outstandingLoan > maxLoan ||
+            outstandingLoan + topupValue > maxLoan
+          ) {
+            outcome.style.display = "flex";
+            outcome.textContent = `You owe ${outstandingLoan}, hence your maximum credit is limited to ${
+              maxLoan - outstandingLoan
+            }!`;
+            outcome.style.backgroundColor = "rgb(229, 183, 183)";
+            outcome.style.padding = "15px";
+          }
+        } else {
+          outcome.style.display = "flex";
+          outcome.textContent = `Top-up amount out of range!`;
+          outcome.style.backgroundColor = "rgb(229, 183, 183)";
+          outcome.style.padding = "15px";
+        }
+      };
+
+      placeBet = (betValue) => {
+        if (accountBalance > 0 && wagerAmount.value <= accountBalance) {
+          let compChoice = Math.ceil(Math.random() * 3);
+          let progressBar = document.getElementById("circular-progress");
+          let valueContainer = document.getElementById("progress-value");
+
+          let progressEndValue = 100;
+          let progressValue = 0;
+          let speed = 20;
+          let result;
+          let odds;
+
+          progressBar.style.display = "grid";
+          outcome.style.display = "none";
+          inputCont.style.display = "none";
+
+          if (compChoice == 1) {
+            result = "Kenya";
+            odds = 2.134;
+          } else if (compChoice == 2) {
+            result = "Draw";
+            odds = 17.95;
+          } else if (compChoice == 3) {
+            result = "Tanzania";
+            odds = 4.52;
+          }
+
+          if (wagerAmount.value >= 30 && wagerAmount.value <= 1000) {
+            let returns = Math.floor(
+              wagerAmount.value * odds - outstandingLoan
+            );
+
+            accountBalance -= wagerAmount.value;
+            myBal.textContent = accountBalance;
+
+            const progress = setInterval(() => {
+              progressValue += 1;
+              valueContainer.textContent = `${progressValue}%`;
+
+              progressBar.style.background = `conic-gradient(
+            dodgerblue ${progressValue * 3.6}deg,
+            rgb(167, 217, 200) ${progressValue * 3.6}deg
+          )`;
+
+              if (progressValue == progressEndValue) {
+                clearInterval(progress);
+                valueContainer.textContent = `Game Ended!`;
+                valueContainer.style.fontSize = "14px";
+
+                if (betValue == result) {
+                  outcome.style.display = "flex";
+                  outcome.textContent = `Congratulations, stake of '${betValue}' won! Return: KES${returns}`;
+                  outcome.style.backgroundColor = "#b1f3b1";
+                  outcome.style.padding = "15px";
+                  accountBalance += returns;
+                  console.log(accountBalance);
+                  progressBar.style.display = "none";
+                  inputCont.style.display = "block";
+                  outstandingLoan -= outstandingLoan;
+
+                  if (accountBalance < 0) {
+                    outstandingLoan -= accountBalance;
+                    accountBalance -= accountBalance;
+                    myBal.textContent = accountBalance;
+                    credit.textContent = outstandingLoan;
+                  } else if (accountBalance >= 0) {
+                    myBal.textContent = accountBalance;
+                    credit.textContent = outstandingLoan;
+                  }
+                } else {
+                  outcome.style.display = "flex";
+                  outcome.textContent = `Your bet '${betValue}' was lost. Outcome: '${result}'`;
+                  outcome.style.backgroundColor = "rgb(229, 183, 183)";
+                  outcome.style.padding = "15px";
+                  progressBar.style.display = "none";
+                  inputCont.style.display = "block";
+                }
+
+                console.log(result);
+              }
+            }, speed);
+          } else {
+            outcome.style.display = "flex";
+            outcome.textContent = `Bet amount must range between 30 and 1000`;
+            outcome.style.backgroundColor = "rgb(229, 183, 183)";
+            outcome.style.padding = "15px";
+            progressBar.style.display = "none";
+            inputCont.style.display = "block";
+          }
+        } else {
+          outcome.style.display = "flex";
+          outcome.textContent = `Your balance is insufficient!`;
+          outcome.style.backgroundColor = "rgb(229, 183, 183)";
+          outcome.style.padding = "15px";
+          inputCont.style.display = "block";
+        }
+      };
+    </script>
+  </body>
+</html>
